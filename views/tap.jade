@@ -2,6 +2,7 @@ extends layout
 
 block content
     script(defer, src='/js/tap.js')
-    div
-        a(id='sender')='Send a Message'
+    div(id='sender', style='width: 100%; height: 100%')
+        //a(id='sender')='Send a Message'
+        a 'Send a Message'
         ul(id='receiver')
