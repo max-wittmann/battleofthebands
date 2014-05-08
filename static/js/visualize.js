@@ -15,7 +15,6 @@ $(document).ready(function () {
     console.log(gaugeMaster);
 
     socket.on('server_message', function (data) {
-        $('#receiver').append('<li>' + data + '</li>');
         curClaps++;
     });
 
