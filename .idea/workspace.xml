@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="28882be4-bbc3-41be-8c87-016d5ed49188" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/html/multitouchJQuery.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/server.js" afterPath="$PROJECT_DIR$/server.js" />
     </list>
     <ignored path="battleofthebands.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -67,17 +66,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="layout.jade" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/templates/views/layout.jade">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="34" column="34" selection-start="1084" selection-end="1084" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="705">
-              <folding>
-                <marker date="1399523823000" expanded="true" signature="1171:1377" placeholder="{...}" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="layout.jade" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/views/layout.jade">
           <provider selected="true" editor-type-id="text-editor">
@@ -145,13 +133,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="multitouchJQuery.html" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="multitouchJQuery.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/static/html/multitouchJQuery.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="8" column="89" selection-start="334" selection-end="334" vertical-scroll-proportion="0.28503564" vertical-offset="0" max-vertical-offset="675">
+            <state line="8" column="89" selection-start="334" selection-end="334" vertical-scroll-proportion="-5.0" vertical-offset="0" max-vertical-offset="675">
               <folding>
                 <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="package.json" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/package.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="10" column="29" selection-start="299" selection-end="299" vertical-scroll-proportion="-5.125" vertical-offset="27" max-vertical-offset="390">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="server.js" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/server.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="39" column="0" selection-start="1344" selection-end="1344" vertical-scroll-proportion="0.6363636" vertical-offset="333" max-vertical-offset="1620">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -173,7 +179,6 @@
         <option value="$PROJECT_DIR$/views/index.jade" />
         <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/templates/views/layout.jade" />
-        <option value="$PROJECT_DIR$/server.js" />
         <option value="$PROJECT_DIR$/static/js/require.js" />
         <option value="$PROJECT_DIR$/static/js/app.js" />
         <option value="$PROJECT_DIR$/static/js/visualize.js" />
@@ -185,6 +190,7 @@
         <option value="$PROJECT_DIR$/static/html/touchtest.html" />
         <option value="$PROJECT_DIR$/static/html/multitouch.html" />
         <option value="$PROJECT_DIR$/static/html/multitouchJQuery.html" />
+        <option value="$PROJECT_DIR$/server.js" />
       </list>
     </option>
   </component>
@@ -725,12 +731,12 @@
       <workItem from="1399509854110" duration="3015000" />
       <workItem from="1399522276522" duration="1639000" />
       <workItem from="1399524046399" duration="90000" />
-      <workItem from="1399524272005" duration="6383000" />
+      <workItem from="1399524272005" duration="6950000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="11944000" />
+    <option name="totallyTimeSpent" value="12511000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="22" width="1440" height="816" extended-state="0" />
@@ -788,7 +794,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="18" column="39" selection-start="565" selection-end="565" vertical-scroll-proportion="0.0" vertical-offset="65" max-vertical-offset="705">
           <folding>
-            <marker date="1399523823000" expanded="true" signature="1171:1377" placeholder="{...}" />
+            <marker date="1399523823000" expanded="true" signature="-1:-1" placeholder="{...}" />
           </folding>
         </state>
       </provider>
@@ -860,7 +866,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="18" column="39" selection-start="565" selection-end="565" vertical-scroll-proportion="0.0" vertical-offset="270" max-vertical-offset="705">
           <folding>
-            <marker date="1399523823000" expanded="true" signature="1171:1377" placeholder="{...}" />
+            <marker date="1399523823000" expanded="true" signature="-1:-1" placeholder="{...}" />
           </folding>
         </state>
       </provider>
@@ -994,20 +1000,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="14" column="21" selection-start="374" selection-end="374" vertical-scroll-proportion="0.0" vertical-offset="210" max-vertical-offset="390">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/server.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="52" column="56" selection-start="1639" selection-end="1639" vertical-scroll-proportion="0.035460994" vertical-offset="765" max-vertical-offset="1530">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/initproject.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state line="20" column="54" selection-start="713" selection-end="713" vertical-scroll-proportion="0.0" vertical-offset="24" max-vertical-offset="660">
@@ -1049,7 +1041,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="34" column="34" selection-start="1084" selection-end="1084" vertical-scroll-proportion="0.0" vertical-offset="8" max-vertical-offset="705">
           <folding>
-            <marker date="1399523823000" expanded="true" signature="1171:1377" placeholder="{...}" />
+            <marker date="1399523823000" expanded="true" signature="-1:-1" placeholder="{...}" />
           </folding>
         </state>
       </provider>
@@ -1112,10 +1104,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/static/html/multitouchJQuery.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="8" column="89" selection-start="334" selection-end="334" vertical-scroll-proportion="0.28503564" vertical-offset="0" max-vertical-offset="675">
+        <state line="8" column="89" selection-start="334" selection-end="334" vertical-scroll-proportion="-5.0" vertical-offset="0" max-vertical-offset="675">
           <folding>
             <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="29" selection-start="299" selection-end="299" vertical-scroll-proportion="-5.125" vertical-offset="27" max-vertical-offset="390">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/server.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="39" column="0" selection-start="1344" selection-end="1344" vertical-scroll-proportion="0.6363636" vertical-offset="333" max-vertical-offset="1620">
+          <folding />
         </state>
       </provider>
     </entry>

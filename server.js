@@ -33,6 +33,12 @@ server.listen(port);
 
 //Setup Socket.IO
 var io = io.listen(server);
+//Configure socket.io to use polling for heroku (Todo: make this configurable)
+io.configure(function () {
+    io.set("transports", ["xhr-polling"]);
+    io.set("polling duration", 10);
+});
+
 io.sockets.on('connection', function (socket) {
     console.log('Client Connected' + socket);
 
