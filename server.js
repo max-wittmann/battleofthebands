@@ -2,6 +2,7 @@
 var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
+    , requirejs = require('requirejs')
     , port = (process.env.PORT || 8081);
 
 //Setup Express
