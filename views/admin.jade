@@ -1,4 +1,16 @@
 extends layout
 block content
+    script(defer, src='/js/admin.js')
     div
         h1 Admin Page
+            p
+                h2 Reset
+                form(method='post')
+                    input(type='button',value='Reset',onclick='resetCounter()')
+
+            p
+                h2 Band Name
+                form(method='post')
+                    input(id='bandName',type='text')
+                    input(type='button',value='Submit',onclick='setBandName()')
+

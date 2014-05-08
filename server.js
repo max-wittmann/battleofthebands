@@ -3,6 +3,7 @@ var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
     , requirejs = require('requirejs')
+    , fs = require('fs')
     , port = (process.env.PORT || 8081);
 
 //Setup Express
@@ -32,6 +33,10 @@ server.error(function (err, req, res, next) {
 server.listen(port);
 
 //Setup Socket.IO
+var counter = 0;
+var recordBuffer = [];
+var bandName = 'Dummy';
+
 var io = io.listen(server);
 //Configure socket.io to use polling for heroku (Todo: make this configurable)
 io.configure(function () {
@@ -43,8 +48,16 @@ io.sockets.on('connection', function (socket) {
     console.log('Client Connected' + socket);
 
     socket.on('message', function (data) {
-        socket.broadcast.emit('server_message', data);
-        socket.emit('server_message', data);
+        counter++;
+        var record = { 'id': socket.id, 'counter': counter, 'time': new Date()};
+        recordBuffer.push(record);
+
+        var serverMessage = JSON.stringify(record);
+
+        //broadcast to original sender and also broadcast message
+        socket.broadcast.emit('server_message', serverMessage);
+        socket.emit('server_message', serverMessage);
+//        flushEventsToDisk();
     });
 
     socket.on('disconnect', function () {
@@ -52,12 +65,12 @@ io.sockets.on('connection', function (socket) {
     });
 });
 
-
 ///////////////////////////////////////////
 //              Routes                   //
 ///////////////////////////////////////////
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
+
 
 server.get('/', function (req, res) {
     res.render('index.jade', {
@@ -73,6 +86,20 @@ server.get('/admin', function (req, res) {
             title: 'Admin page', description: 'Admin functions', author: 'Your Name', analyticssiteid: 'XXXXXXX'
         }
     });
+});
+
+server.post('/admin-reset', function (req, res) {
+    init();
+    res.setHeader('Content-Type', 'application/json');
+    return res.send({'status': 'OK'});
+});
+
+server.post('/admin-band-name', function (req, res) {
+    bandName = req.body.bandName;
+    init();
+
+    res.setHeader('Content-Type', 'application/json');
+    return res.send({'status': 'OK', 'message': 'Band name updated'});
 });
 
 server.get('/tap', function (req, res) {
@@ -97,6 +124,30 @@ function NotFound(msg) {
     this.name = 'NotFound';
     Error.call(this, msg);
     Error.captureStackTrace(this, arguments.callee);
+}
+
+function init() {
+    counter = 0;
+    recordBuffer = [];
+    //TODO: this should be a new file
+    clearInterval();
+}
+
+function flushEventsToDisk() {
+//flush to disk every 500 ms
+    setInterval(function () {
+        //write to file system for potential replay
+        fs.appendFile(buildMessagesFilePath(), JSON.stringify(recordBuffer) + '\n', function (err) {
+            if (err) {
+                util.error("Failed to write to file.");
+            }
+            recordBuffer = [];
+        });
+    }, 5000);
+}
+
+function buildMessagesFilePath() {
+    return '/tmp/' + bandName + '.txt';
 }
 
 console.log('Listening on http://0.0.0.0:' + port);
