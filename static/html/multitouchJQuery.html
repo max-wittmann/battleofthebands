@@ -8,7 +8,7 @@
         console.log(box);
 
 //        $("#box").text("Hello!");
-        box.text("Hello!");
+//        box.text("Hello!");
 
         box.bind('touchstart', function(evt){
 //            box.innerHTML = evt.touches.length + " touchstart called";
@@ -36,10 +36,9 @@
             return false;
         });
 
-        if (!(typeof box.ontouchstart != 'undefined')) {
-//            box.style.backgroundColor = "red";
-            box.css("backgroundColor", "red");
-        }
+//        if (!(typeof box.ontouchstart != 'undefined')) {
+//            box.css("backgroundColor", "red");
+//        }
     });
     </script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
