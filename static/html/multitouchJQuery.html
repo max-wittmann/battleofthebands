@@ -7,23 +7,27 @@
         var box = $("#box");
         console.log(box);
 
-        box.bind('touchstart', function(){
+//        $("#box").text("Hello!");
+        box.text("Hello!");
+
+        box.bind('touchstart', function(evt){
 //            box.innerHTML = evt.touches.length + " touchstart called";
             box.text(evt.touches.length + " touchstart called")
             evt.preventDefault();
             return false;
         });
 
-        box.bind('touchmove', function(){
+        box.bind('touchmove', function(evt){
 //            box.innerHTML = evt.touches.length + " touchmove called";
             box.text(evt.touches.length + " touchmove called");
             evt.preventDefault();
             return false;
         });
 
-        box.bind('touchend', function(){
+        box.bind('touchend', function(evt){
 //            box.innerHTML = evt.touches.length + " touchend called";
             box.text(evt.touches.length + " touchend called");
+
             evt.preventDefault();
             return false;
         });
