@@ -4,33 +4,33 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
-        var box = $("#box");
-        console.log(box);
+            var box = $("#box");
+            console.log(box);
 
-        $(box).bind('click', function(evt){
-            $(box).text(" touchstart called")
-            return false;
+            $(box).bind('click', function(evt){
+                $(box).text(" touchstart called")
+                evt.preventDefault();
+                return false;
+            });
+
+            $(box).bind('touchstart', function(evt){
+                box.text(evt.touches.length + " touchstart called")
+                evt.preventDefault();
+                return false;
+            });
+
+            box.bind('touchmove', function(evt){
+                box.text(evt.touches.length + " touchmove called");
+                evt.preventDefault();
+                return false;
+            });
+
+            box.bind('touchend', function(evt){
+                box.text(evt.touches.length + " touchend called");
+                evt.preventDefault();
+                return false;
+            });
         });
-
-        $(box).bind('touchstart', function(evt){
-            box.text(evt.touches.length + " touchstart called")
-            return false;
-        });
-
-        box.bind('touchmove', function(evt){
-            box.text(evt.touches.length + " touchmove called");
-            return false;
-        });
-
-        box.bind('touchend', function(evt){
-            box.text(evt.touches.length + " touchend called");
-            return false;
-        });
-
-//        if (!(typeof box.ontouchstart != 'undefined')) {
-//            box.css("backgroundColor", "red");
-//        }
-    });
     </script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Multitouch Test</title>
