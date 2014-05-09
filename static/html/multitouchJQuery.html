@@ -13,30 +13,22 @@
 //                return false;
 //            });
 
-            $(box).bind("touchstart", function(evt){
+            $(box).bind("touchstart touchmove touchend", function(evt){
 
-//                $(box).text(evt + ", " + evt.touches.length + " touchstart called");
-                $(box).text(evt + ", " + " touchstart called");
-//                alert("Foo");
+                $(box).text(evt.type + ", " + " touchstart called");
                 evt.preventDefault();
 //                return false;
             });
-
-            $(box).bind('touchmove', function(evt){
-//                $(box).text(evt + ", " + evt.touches.length + " touchmove called");
-                $(box).text(evt + ", "  + " touchmove called");
-//                alert("Foo");
-                evt.preventDefault();
-//                return false;
-            });
-
-            $(box).bind('touchend', function(evt){
-//                $(box).text(evt + ", " + evt.touches.length + " touchend called");
-                $(box).text(evt + ", " + " touchend called");
-//                alert("Foo");
-                evt.preventDefault();
-//                return false;
-            });
+//
+//            $(box).bind('touchmove', function(evt){
+//                $(box).text(evt + ", "  + " touchmove called");
+//                evt.preventDefault();
+//            });
+//
+//            $(box).bind('touchend', function(evt){
+//                $(box).text(evt + ", " + " touchend called");
+//                evt.preventDefault();
+//            });
         });
     </script>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
