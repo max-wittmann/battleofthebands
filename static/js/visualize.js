@@ -5,12 +5,8 @@ $(document).ready(function () {
 
     var socket = io.connect();
 
-//    console.log("CustomGaugeBuilder is " + customGaugeBuilder);
-    console.log("PreGaugeMaster");
     var gaugeMaster = customGaugeBuilder.createGaugeMaster();
     gaugeMaster.initialize();
-    console.log("PostGaugeMaster");
-//    console.log(gaugeMaster);
 
     socket.on('server_message', function (data) {
         curClaps++;
