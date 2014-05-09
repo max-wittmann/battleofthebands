@@ -1,6 +1,3 @@
-/* Author: YOUR NAME HERE
- */
-
 require(['customGauge'], function(customGaugeBuilder) {
 $(document).ready(function () {
     var curClaps = 0;
@@ -8,11 +5,12 @@ $(document).ready(function () {
 
     var socket = io.connect();
 
-//    var gaugeMaster = require(['customGauge']).createGaugeMaster();
-//    console.log("CustomGauge is " + require(['customGauge']));
-    console.log("CustomGaugeBuilder is " + customGaugeBuilder);
+//    console.log("CustomGaugeBuilder is " + customGaugeBuilder);
+    console.log("PreGaugeMaster");
     var gaugeMaster = customGaugeBuilder.createGaugeMaster();
-    console.log(gaugeMaster);
+    gaugeMaster.initialize();
+    console.log("PostGaugeMaster");
+//    console.log(gaugeMaster);
 
     socket.on('server_message', function (data) {
         curClaps++;
