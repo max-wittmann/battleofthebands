@@ -7,29 +7,35 @@
             var box = $("#box");
             console.log(box);
 
-            $(box).bind('click', function(evt){
-                $(box).text(" touchstart called")
-                evt.preventDefault();
-                return false;
-            });
+//            $(box).bind('click', function(evt){
+//                $(box).text(" touchstart called")
+//                evt.preventDefault();
+//                return false;
+//            });
 
-            $(box).bind('touchstart', function(evt){
-                box.text(evt.touches.length + " touchstart called")
-                evt.preventDefault();
-                return false;
-            });
+            $(box).bind("touchstart", function(evt){
 
+//                $(box).text(evt + ", " + evt.touches.length + " touchstart called");
+                $(box).text(evt + ", " + " touchstart called");
+                alert("Foo");
+                evt.preventDefault();
+//                return false;
+            });
 
             $(box).bind('touchmove', function(evt){
-                $(box).text(evt.touches.length + " touchmove called");
+//                $(box).text(evt + ", " + evt.touches.length + " touchmove called");
+                $(box).text(evt + ", "  + " touchmove called");
+                alert("Foo");
                 evt.preventDefault();
-                return false;
+//                return false;
             });
 
             $(box).bind('touchend', function(evt){
-                $(box).text(evt.touches.length + " touchend called");
+//                $(box).text(evt + ", " + evt.touches.length + " touchend called");
+                $(box).text(evt + ", " + " touchend called");
+                alert("Foo");
                 evt.preventDefault();
-                return false;
+//                return false;
             });
         });
     </script>
