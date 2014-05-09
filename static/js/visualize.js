@@ -2,6 +2,8 @@ require(['customGauge'], function(customGaugeBuilder) {
 $(document).ready(function () {
     var curClaps = 0;
     var updateTime = 500;
+    var idsSeenSinceLastUpdate = {};
+    var clapPerAudienceLimit = 3;
 
     var socket = io.connect();
 
@@ -9,13 +11,21 @@ $(document).ready(function () {
     gaugeMaster.initialize();
 
     socket.on('server_message', function (data) {
-        curClaps++;
+        if(!idsSeenSinceLastUpdate.hasOwnProperty(data.id) || idsSeenSinceLastUpdate[data.id] < clapPerAudienceLimit)
+        {
+            curClaps++;
+            console.log("Seen " + idsSeenSinceLastUpdate[data.id] + " claps");
+            if(idsSeenSinceLastUpdate.hasOwnProperty(data.id))
+                idsSeenSinceLastUpdate[data.id]++;
+            else
+                idsSeenSinceLastUpdate[data.id] = 1;
+        }
     });
 
     setInterval(function(){
-        console.log("Calling transition");
         gaugeMaster.update(curClaps);
         curClaps = 0;
+        idsSeenSinceLastUpdate = {};
     },updateTime);
 })
 });

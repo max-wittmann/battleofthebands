@@ -32,7 +32,7 @@ define(["gauge"], function() {
         };
 
         gaugeMaster.update = function(value) {
-            console.log("Update called");
+//            console.log("Update called");
             if(value < this.clapGauge.config.min) value = this.clapGauge.config.min;
             else if(value > this.clapGauge.config.max) value = this.clapGauge.config.max;
             this.clapGauge.redraw(value);

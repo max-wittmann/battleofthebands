@@ -1,3 +1,3 @@
-require(['customGauge'], function(customGauge) {
-    customGauge.createGaugeMaster();
-});
+//require(['customGauge'], function(customGauge) {
+//    customGauge.createGaugeMaster();
+//});
