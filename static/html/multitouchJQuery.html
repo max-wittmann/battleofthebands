@@ -7,32 +7,23 @@
         var box = $("#box");
         console.log(box);
 
-//        $("#box").text("Hello!");
-//        box.text("Hello!");
+        $(box).bind('click', function(evt){
+            $(box).text(" touchstart called")
+            return false;
+        });
 
-        box.bind('touchstart', function(evt){
-//            box.innerHTML = evt.touches.length + " touchstart called";
+        $(box).bind('touchstart', function(evt){
             box.text(evt.touches.length + " touchstart called")
-            alert("Goo");
-//            evt.preventDefault();
             return false;
         });
 
         box.bind('touchmove', function(evt){
-//            box.innerHTML = evt.touches.length + " touchmove called";
             box.text(evt.touches.length + " touchmove called");
-            alert("Goo");
-//            evt.preventDefault();
             return false;
         });
 
         box.bind('touchend', function(evt){
-//            box.innerHTML = evt.touches.length + " touchend called";
             box.text(evt.touches.length + " touchend called");
-            alert("Goo");
-
-
-//            evt.preventDefault();
             return false;
         });
 
