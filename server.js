@@ -36,6 +36,7 @@ server.listen(port);
 var counter = 0;
 var recordBuffer = [];
 var bandName = 'Dummy';
+var nextId = 0;
 
 var io = io.listen(server);
 //Configure socket.io to use polling for heroku (Todo: make this configurable)
@@ -47,17 +48,28 @@ io.configure(function () {
 io.sockets.on('connection', function (socket) {
     console.log('Client Connected' + socket);
 
-    socket.on('message', function (data) {
-        counter++;
-        var record = { 'id': socket.id, 'counter': counter, 'time': new Date()};
-        recordBuffer.push(record);
+    socket.on('clap', function (data) {
+        //Ignore things with non-id
+        if(data.id != -1)
+        {
+            counter++;
+            var record = { 'id': socket.id, 'counter': counter, 'time': new Date()};
+            recordBuffer.push(record);
+            console.log("Got a clap from " + data.id);
 
-        var serverMessage = JSON.stringify(record);
+            var serverMessage = JSON.stringify(record);
 
-        //broadcast to original sender and also broadcast message
-        socket.broadcast.emit('server_message', serverMessage);
-        socket.emit('server_message', serverMessage);
-//        flushEventsToDisk();
+            //broadcast to original sender and also broadcast message
+            socket.broadcast.emit('server_message', serverMessage);
+    //        socket.emit('server_message', serverMessage);
+        }
+    });
+
+    //Here, could attack by constantly requesting new ids (could even request many ids and constantly send) and then sending claps;
+    //should check by IP, have a look at (https://github.com/LearnBoost/socket.io/wiki/Authorizing)
+    //Also should generate random ids rather than sequential
+    socket.on('request_id', function(data) {
+        socket.emit('assign_id', {'id': nextId++});
     });
 
     socket.on('disconnect', function () {
