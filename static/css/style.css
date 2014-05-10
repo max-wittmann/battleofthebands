@@ -1,0 +1,19 @@
+.bigText {
+    font-size: 200%;
+}
+
+.highIntensity {
+    background-color: red;
+}
+
+.mediumIntensity {
+    background-color: #a9458c;
+}
+
+.lowIntensity {
+    background-color: blue;
+}
+
+.noIntensity {
+    background-color: #666666;
+}

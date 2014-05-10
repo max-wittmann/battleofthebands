@@ -1,4 +1,4 @@
 {
     "version": "v0.6.6",
-    "socketMethod": "polling"
+    "socketMethod": "notpolling"
 }

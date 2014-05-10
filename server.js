@@ -46,6 +46,10 @@ var clapPerAudienceLimit = 3;
 
 
 var io = io.listen(server);
+
+//Todo: Currently this isn't cleaned and would accumulate dead sockets; should clean it out periodically
+var idToSocket = {};
+
 //Option to use polling for heroku
 console.log("Socket method is " + config.socketMethod);
 if(config.socketMethod == "polling")
@@ -66,10 +70,27 @@ io.sockets.on('connection', function (socket) {
             if(!idsSeenSinceLastUpdate.hasOwnProperty(data.id) || idsSeenSinceLastUpdate[data.id] < clapPerAudienceLimit)
             {
                 console.log("Seen " + idsSeenSinceLastUpdate[data.id] + " claps");
+
+                //Increment last-seen (could have this in here instead of as a map, and just check id?)
                 if(idsSeenSinceLastUpdate.hasOwnProperty(data.id))
                     idsSeenSinceLastUpdate[data.id]++;
                 else
                     idsSeenSinceLastUpdate[data.id] = 1;
+
+
+//                if(idsSeenSinceLastUpdate[data.id] == 1)
+//                {
+//                    socket.emit("clap_intensity", {"clapIntensity": "low"});
+//                }
+//                else if(idsSeenSinceLastUpdate[data.id] == 2)
+//                {
+//                    socket.emit("clap_intensity", {"clapIntensity": "medium"});
+//                }
+//                else
+//                {
+//                    socket.emit("clap_intensity", {"clapIntensity": "high"});
+//                }
+
                 counter++;
 
                 var record = { 'id': socket.id, 'counter': counter, 'time': new Date()};
@@ -82,22 +103,64 @@ io.sockets.on('connection', function (socket) {
                 socket.broadcast.emit('server_message', serverMessage);
             }
         }
+        else {
+            socket.emit("clap_intensity", {"clapIntensity": "none"});
+        }
     });
 
     //Here, could attack by constantly requesting new ids (could even request many ids and constantly send) and then sending claps;
     //should check by IP, have a look at (https://github.com/LearnBoost/socket.io/wiki/Authorizing)
     //Also should generate random ids rather than sequential
     socket.on('request_id', function(data) {
-        socket.emit('assign_id', {'id': nextId++});
-        console.log("Id requested, returned " + (nextId-1));
+        var curId = nextId++;
+        socket.emit('assign_id', {'id': curId});
+        idToSocket[curId] = socket;
+        console.log("Id requested, returned " + curId);
     });
 
     socket.on('disconnect', function () {
         console.log('Client Disconnected.');
     });
+
+    //This won't synch with how claps are actually handled, but does it matter?
+//    setInterval(function() {
+//        if(idsSeenSinceLastUpdate[data.id] == 1)
+//        {
+//            socket.emit("clap_intensity", {"clapIntensity": "low"});
+//        }
+//        else if(idsSeenSinceLastUpdate[data.id] == 2)
+//        {
+//            socket.emit("clap_intensity", {"clapIntensity": "medium"});
+//        }
+//        else
+//        {
+//            socket.emit("clap_intensity", {"clapIntensity": "high"});
+//        }
+//    }, resetTime);
 });
 
 setInterval(function(){
+    //Send clap intensity to clappers so they can adjust their clapping
+    for(var id in idsSeenSinceLastUpdate) {
+        console.log("Id is " + id);
+        if(id == -1)
+            continue;
+        var socket = idToSocket[id];
+        if(idsSeenSinceLastUpdate[id] == 1)
+        {
+            socket.emit("clap_intensity", {"clapIntensity": "low"});
+        }
+        else if(idsSeenSinceLastUpdate[id] == 2)
+        {
+            socket.emit("clap_intensity", {"clapIntensity": "medium"});
+        }
+        else
+        {
+            socket.emit("clap_intensity", {"clapIntensity": "high"});
+        }
+    }
+
+
     idsSeenSinceLastUpdate = {};
 }, resetTime);
 
