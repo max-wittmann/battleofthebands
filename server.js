@@ -1,3 +1,5 @@
+var config = require('./config');
+
 //setup Dependencies
 var connect = require('connect')
     , express = require('express')
@@ -38,12 +40,21 @@ var recordBuffer = [];
 var bandName = 'Dummy';
 var nextId = 0;
 
+var idsSeenSinceLastUpdate = {};
+var resetTime = 500;
+var clapPerAudienceLimit = 3;
+
+
 var io = io.listen(server);
-//Configure socket.io to use polling for heroku (Todo: make this configurable)
-io.configure(function () {
-    io.set("transports", ["xhr-polling"]);
-    io.set("polling duration", 10);
-});
+//Option to use polling for heroku
+console.log("Socket method is " + config.socketMethod);
+if(config.socketMethod == "polling")
+{
+    io.configure(function () {
+        io.set("transports", ["xhr-polling"]);
+        io.set("polling duration", 10);
+    });
+}
 
 io.sockets.on('connection', function (socket) {
     console.log('Client Connected' + socket);
@@ -52,16 +63,24 @@ io.sockets.on('connection', function (socket) {
         //Ignore things with non-id
         if(data.id != -1)
         {
-            counter++;
-            var record = { 'id': socket.id, 'counter': counter, 'time': new Date()};
-            recordBuffer.push(record);
-            console.log("Got a clap from " + data.id);
+            if(!idsSeenSinceLastUpdate.hasOwnProperty(data.id) || idsSeenSinceLastUpdate[data.id] < clapPerAudienceLimit)
+            {
+                console.log("Seen " + idsSeenSinceLastUpdate[data.id] + " claps");
+                if(idsSeenSinceLastUpdate.hasOwnProperty(data.id))
+                    idsSeenSinceLastUpdate[data.id]++;
+                else
+                    idsSeenSinceLastUpdate[data.id] = 1;
+                counter++;
 
-            var serverMessage = JSON.stringify(record);
+                var record = { 'id': socket.id, 'counter': counter, 'time': new Date()};
+                recordBuffer.push(record);
+                console.log("Got a clap from " + data.id);
 
-            //broadcast to original sender and also broadcast message
-            socket.broadcast.emit('server_message', serverMessage);
-    //        socket.emit('server_message', serverMessage);
+                var serverMessage = JSON.stringify(record);
+
+                //broadcast to original sender and also broadcast message
+                socket.broadcast.emit('server_message', serverMessage);
+            }
         }
     });
 
@@ -77,6 +96,10 @@ io.sockets.on('connection', function (socket) {
         console.log('Client Disconnected.');
     });
 });
+
+setInterval(function(){
+    idsSeenSinceLastUpdate = {};
+}, resetTime);
 
 ///////////////////////////////////////////
 //              Routes                   //
