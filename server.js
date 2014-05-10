@@ -70,6 +70,7 @@ io.sockets.on('connection', function (socket) {
     //Also should generate random ids rather than sequential
     socket.on('request_id', function(data) {
         socket.emit('assign_id', {'id': nextId++});
+        console.log("Id requested, returned " + (nextId-1));
     });
 
     socket.on('disconnect', function () {
