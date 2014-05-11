@@ -1,4 +1,5 @@
 {
     "version": "v0.6.6",
-    "socketMethod": "notpolling"
+    "socketMethod": "notpolling",
+    "vizMethod": "gauge"
 }

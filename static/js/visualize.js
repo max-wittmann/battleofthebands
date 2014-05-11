@@ -1,25 +1,52 @@
-require(['customGauge'], function(customGaugeBuilder) {
-$(document).ready(function () {
-//    var curClaps = 0;
-//    var updateTime = 500;
+require(['./clientConfig'], function(config) {
+    var visualizations = {"gauge": vizGauge};
+//    var config = require('./clientConfig');
 
-    var socket = io.connect();
+    console.log("Config is " + config);
+    for(key in config) {
+        console.log(key + ", " + config[key]);
+    }
 
-    var gaugeMaster = customGaugeBuilder.createGaugeMaster();
-    gaugeMaster.initialize();
+    function initViz(vizSelector) {
+//        var vizName = config.vizMethod;
+        var vizName = config["vizMethod"];
 
-//    socket.on('server_message', function (data) {
-//        curClaps++;
-//    });
+        if(!visualizations.hasOwnProperty(vizName)) {
+            console.log("Don't have visualization " + vizName + ", defaulting to gauge");
+            vizName = "gauge";
+        }
+        visualizations[vizName](vizSelector);
+    }
 
-    socket.on('visualize_claps', function (data) {
-        gaugeMaster.update(data.nrClaps);
-    });
+    function vizGauge(vizSelector) {
+        require(['customGauge'], function(customGaugeBuilder) {
+            var gaugeMaster = customGaugeBuilder.createGaugeMaster(vizSelector);
+            $(document).ready(buildViz(gaugeMaster.initialize, gaugeMaster.update));
+        });
+    }
 
+    function buildViz(initFunc, updateFunc) {
+        var socket = io.connect();
 
-//    setInterval(function(){
-//        gaugeMaster.update(curClaps);
-//        curClaps = 0;
-//    },updateTime);
-})
+        initFunc(socket);
+
+        socket.on('visualize_claps', function (data) {
+            updateFunc(data.nrClaps);
+        });
+    }
+
+    initViz("vizArea");
 });
+
+//require(['customGauge'], function(customGaugeBuilder) {
+//$(document).ready(function () {
+//    var socket = io.connect();
+//
+//    var gaugeMaster = customGaugeBuilder.createGaugeMaster();
+//    gaugeMaster.initialize();
+//
+//    socket.on('visualize_claps', function (data) {
+//        gaugeMaster.update(data.nrClaps);
+//    });
+//})
+//});

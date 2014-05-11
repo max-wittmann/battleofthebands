@@ -1,15 +1,9 @@
 define(["gauge"], function() {
 
-    var createGaugeMaster = function() {
+    var createGaugeMaster = function(vizSelector) {
         var gaugeMaster = {};
         gaugeMaster.clapGauge = {};
-
-        gaugeMaster.initialize = function()
-        {
-            console.log("Initialize called");
-            this.clapGauge = this.createGauge("clapNumber", "Clap 'O Meter");
-            this.clapGauge.render(); //It'll break if you don't render it before redrawing
-        }
+        gaugeMaster.vizSelector = vizSelector;
 
         gaugeMaster.createGauge = function (name, label, min, max)
         {
@@ -27,15 +21,23 @@ define(["gauge"], function() {
             config.yellowZones = [{ from: config.min + range*0.75, to: config.min + range*0.9 }];
             config.redZones = [{ from: config.min + range*0.9, to: config.max }];
 
-            var gauge = new Gauge(name + "GaugeContainer", config);
+            var gauge = new Gauge(vizSelector, config);
             return gauge;
         };
 
+        gaugeMaster.initialize = function()
+        {
+            console.log("Initialize called");
+            console.log(this);
+            gaugeMaster.clapGauge = gaugeMaster.createGauge("clapNumber", "Clap 'O Meter");
+            gaugeMaster.clapGauge.render(); //It'll break if you don't render it before redrawing
+        }
+
         gaugeMaster.update = function(value) {
 //            console.log("Update called");
-            if(value < this.clapGauge.config.min) value = this.clapGauge.config.min;
-            else if(value > this.clapGauge.config.max) value = this.clapGauge.config.max;
-            this.clapGauge.redraw(value);
+            if(value < gaugeMaster.clapGauge.config.min) value = gaugeMaster.clapGauge.config.min;
+            else if(value > gaugeMaster.clapGauge.config.max) value = gaugeMaster.clapGauge.config.max;
+            gaugeMaster.clapGauge.redraw(value);
         }
 //        gaugeMaster.initialize();
 

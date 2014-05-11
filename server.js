@@ -85,10 +85,10 @@ io.sockets.on('connection', function (socket) {
                 recordBuffer.push(record);
                 console.log("Got a clap from " + data.id);
 
-                var serverMessage = JSON.stringify(record);
+                //var serverMessage = JSON.stringify(record);
 
                 //broadcast to original sender and also broadcast message
-                socket.broadcast.emit('server_message', serverMessage);
+                //socket.broadcast.emit('server_message', serverMessage);
             }
         }
         else {
@@ -116,7 +116,6 @@ setInterval(function(){
 
     //Send clap intensity to clappers so they can adjust their clapping
     for(var id in idsSeenSinceLastUpdate) {
-        console.log("Id is " + id);
         if(id == -1 || !idToSocket.hasOwnProperty(id))
             continue;
 
