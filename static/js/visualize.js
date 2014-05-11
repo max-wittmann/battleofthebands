@@ -15,7 +15,6 @@ $(document).ready(function () {
     setInterval(function(){
         gaugeMaster.update(curClaps);
         curClaps = 0;
-//        idsSeenSinceLastUpdate = {};
     },updateTime);
 })
 });

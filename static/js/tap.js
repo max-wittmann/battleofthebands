@@ -1,60 +1,63 @@
-//Todo: Consider whether the 'clap colorchange' should be sent back from
-//server to indicate feedback; that way, the user knows whether claps
-//are registering succesfully
 $(document).ready(function () {
     var socket = io.connect();
     var myId = -1;
     var curClapIntensity = 'none';
 
-    $('body').bind('click', function () {
-        socket.emit('message', 'Message Sent on ' + new Date());
-    });
-
-//    $(window).bind("touchstart touchmove touchend", function(evt){
     $(window).bind("touchstart click", function(evt){
-        if(myId == -1) {
-            socket.emit('request_id', {});
-            console.log("Requesting id");
+        function applyUIClapFeedback(clapIntensity) {
+            $("body").removeClass("highIntensity mediumIntensity lowIntensity noIntensity");
+            $("body").addClass(getClapIntensityClass(clapIntensity));
+
+            var intervalVar = setInterval(
+                function(){
+                    $("body").addClass("noIntensity");
+                    $("body").removeClass("highIntensity mediumIntensity lowIntensity");
+                    window.clearInterval(intervalVar);
+                }, 400
+            );
         }
-        socket.emit('clap', {"id": myId, "time": (new Date()).getTime() });
+
+        function getClapIntensityClass(clapIntensity) {
+            var clapColor = '';
+
+            if(clapIntensity == 'high')
+            {
+                clapColor = 'highIntensity';
+            }
+            else if(clapIntensity == 'medium') {
+                clapColor = 'mediumIntensity';
+            }
+            else if(clapIntensity == 'low') {
+                clapColor = 'lowIntensity';
+            }
+            else {
+                clapColor =  'noIntensity'
+            }
+
+            return clapColor;
+        }
+
+        function requestIdIfNotAssigned() {
+            if(myId == -1) {
+                socket.emit('request_id', {});
+                console.log("Requesting id");
+            }
+        }
+
+        function sendClapToServer(socket, id) {
+            socket.emit('clap', {"id": id, "time": (new Date()).getTime() });
+        }
+
         evt.preventDefault();
-        //Todo: Change this to use class rather than hardcoded styles
-//        $("body").css("backgroundColor", "blue");
-        $("body").addClass("noIntensity");
-
-
-        var clapColor = 'noIntensity';
-        if(curClapIntensity == 'high')
-        {
-            clapColor = 'highIntensity';
-        }
-        else if(curClapIntensity == 'medium') {
-            clapColor = 'mediumIntensity';
-        }
-        else if(curClapIntensity == 'low') {
-            clapColor = 'lowIntensity';
-        }
-        else {
-
-        }
-        $("body").removeClass("highIntensity mediumIntensity lowIntensity noIntensity");
-        $("body").addClass(clapColor);
-
-        var intervalVar = setInterval(
-            function(){
-//                $("body").css("backgroundColor", clapColor);
-                $("body").addClass("noIntensity");
-                $("body").removeClass("highIntensity mediumIntensity lowIntensity");
-                window.clearInterval(intervalVar);
-            }, 400
-        );
+        /*
+        Note that this is asynchrnous; the clap will be lost since it'll be sent with a -1 id.
+        We could 'buffer' these until an id is assigned and then bulk-send 'em, but there shouldn't be much lost by just
+         ignoring it.
+         */
+        requestIdIfNotAssigned();
+        sendClapToServer(socket, myId);
+        applyUIClapFeedback(curClapIntensity);
     });
-
-//    $("sender").bind("tap", tapHandler);
-//
-//    function tapHandler(event) {
-//        socket.emit('message', 'Message Sent on ' + new Date());
-//    }
 
     socket.on('assign_id', function (data) {
         myId = data.id;
@@ -63,21 +66,9 @@ $(document).ready(function () {
 
     socket.on('clap_intensity', function(data) {
         console.log("Got " + data.clapIntensity);
-      $("#clapIntensity").text(data.clapIntensity);
-      curClapIntensity = data.clapIntensity;
-//       if(data.clapIntensity == 'high') {
-//           $("#sender").css("backgroundColor", "red");
-//       }
-//       else if(data.clapIntensity == 'medium') {
-//           $("#sender").css("backgroundColor", "yellow");
-//       }
-//       else if(data.clapIntensity == 'low') {
-//           $("#sender").css("backgroundColor", "blue");
-//       }
-//       else {
-//           $("#sender").css("backgroundColor", "black");
-//       }
-       setInterval(createUpdateTextInterval("#clapIntensity"), 500);
+        $("#clapIntensity").text(data.clapIntensity);
+        curClapIntensity = data.clapIntensity;
+        setInterval(createUpdateTextInterval("#clapIntensity"), 500);
     });
 
     function createUpdateTextInterval(selector, text) {
@@ -87,13 +78,4 @@ $(document).ready(function () {
         };
         return intervalFunc;
     }
-
-//    function createBackgroundChangeInterval(color) {
-//        var intervalFunc = function() {
-//            $("#sender").css("backgroundColor", color);
-//            window.clearInterval(intervalFunc);
-//        };
-//        return intervalFunc;
-//    }
-
 });
