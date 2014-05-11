@@ -1,3 +1,1 @@
-//require(['customGauge'], function(customGauge) {
-//    customGauge.createGaugeMaster();
-//});
+//Currently does zilch and nada

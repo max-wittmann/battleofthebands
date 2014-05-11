@@ -63,6 +63,8 @@ if(config.socketMethod == "polling")
 io.sockets.on('connection', function (socket) {
     console.log('Client Connected' + socket);
 
+//    socket.on('requestViz')
+
     socket.on('clap', function (data) {
         //Ignore things with non-id
         if(data.id != -1)
@@ -76,20 +78,6 @@ io.sockets.on('connection', function (socket) {
                     idsSeenSinceLastUpdate[data.id]++;
                 else
                     idsSeenSinceLastUpdate[data.id] = 1;
-
-
-//                if(idsSeenSinceLastUpdate[data.id] == 1)
-//                {
-//                    socket.emit("clap_intensity", {"clapIntensity": "low"});
-//                }
-//                else if(idsSeenSinceLastUpdate[data.id] == 2)
-//                {
-//                    socket.emit("clap_intensity", {"clapIntensity": "medium"});
-//                }
-//                else
-//                {
-//                    socket.emit("clap_intensity", {"clapIntensity": "high"});
-//                }
 
                 counter++;
 
@@ -121,31 +109,19 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
         console.log('Client Disconnected.');
     });
-
-    //This won't synch with how claps are actually handled, but does it matter?
-//    setInterval(function() {
-//        if(idsSeenSinceLastUpdate[data.id] == 1)
-//        {
-//            socket.emit("clap_intensity", {"clapIntensity": "low"});
-//        }
-//        else if(idsSeenSinceLastUpdate[data.id] == 2)
-//        {
-//            socket.emit("clap_intensity", {"clapIntensity": "medium"});
-//        }
-//        else
-//        {
-//            socket.emit("clap_intensity", {"clapIntensity": "high"});
-//        }
-//    }, resetTime);
 });
 
 setInterval(function(){
+    var totalClaps = 0;
+
     //Send clap intensity to clappers so they can adjust their clapping
     for(var id in idsSeenSinceLastUpdate) {
         console.log("Id is " + id);
-        if(id == -1)
+        if(id == -1 || !idToSocket.hasOwnProperty(id))
             continue;
+
         var socket = idToSocket[id];
+        totalClaps += idsSeenSinceLastUpdate[id];
         if(idsSeenSinceLastUpdate[id] == 1)
         {
             socket.emit("clap_intensity", {"clapIntensity": "low"});
@@ -160,6 +136,7 @@ setInterval(function(){
         }
     }
 
+    io.sockets.emit("visualize_claps", {"nrClaps": totalClaps});
 
     idsSeenSinceLastUpdate = {};
 }, resetTime);
@@ -169,8 +146,6 @@ setInterval(function(){
 ///////////////////////////////////////////
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
-
-
 server.get('/', function (req, res) {
     res.render('index.jade', {
         locals: {
