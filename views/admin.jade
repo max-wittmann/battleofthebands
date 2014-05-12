@@ -4,17 +4,14 @@ block content
     div
         h1 #{locals.title}
             p
-                h2 Reset
+                h2 Reset Competition
                 form(method='post')
-                    input(type='button',value='Reset',onclick='resetCounter()')
+                    input(type='button',value='Reset',onclick='resetCompetition()')
 
             p
-                h2 Band Name
+                h2 Change Band
                 form(method='post')
                     #bandNames
-                        select(id='bandName',onchange='setBandName()')
+                        select(id='bandName',onchange='changeBand()')
                             for bandName in bandNames
                                 option(value='#{bandName}',selected=currentBand==bandName) #{bandName}
-
-
-

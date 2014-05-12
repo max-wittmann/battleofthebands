@@ -5,6 +5,7 @@ var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
     , requirejs = require('requirejs')
+    , lazy = require('lazy')
     , underscore = require('underscore')
     , fs = require('fs')
     , port = (process.env.PORT || 8081);
@@ -19,6 +20,12 @@ server.configure(function () {
     server.use(express.session({ secret: "shhhhhhhhh!"}));
     server.use(connect.static(__dirname + '/static'));
     server.use(server.router);
+});
+
+auth = express.basicAuth(function (username, password, callback) {
+    var result = ((username === config['admin-principal']) &&
+        (password === config['admin-password']));
+    callback(null, result);
 });
 
 //setup the errors
@@ -40,7 +47,9 @@ var counter = 0;
 var recordBuffer = [];
 var bandName = underscore.chain(
     underscore.map(config["bandNames"],
-        function(num, key) {return num;})).first().value() || "Undefined band";
+        function (num, key) {
+            return num;
+        })).first().value() || "Undefined band";
 var nextId = 0;
 
 var idsSeenSinceLastUpdate = {};
@@ -55,8 +64,7 @@ var idToSocket = {};
 
 //Option to use polling for heroku
 console.log("Socket method is " + config.socketMethod);
-if(config.socketMethod == "polling")
-{
+if (config.socketMethod == "polling") {
     io.configure(function () {
         io.set("transports", ["xhr-polling"]);
         io.set("polling duration", 10);
@@ -70,14 +78,12 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('clap', function (data) {
         //Ignore things with non-id
-        if(data.id != -1)
-        {
-            if(!idsSeenSinceLastUpdate.hasOwnProperty(data.id) || idsSeenSinceLastUpdate[data.id] < clapPerAudienceLimit)
-            {
+        if (data.id != -1) {
+            if (!idsSeenSinceLastUpdate.hasOwnProperty(data.id) || idsSeenSinceLastUpdate[data.id] < clapPerAudienceLimit) {
                 console.log("Seen " + idsSeenSinceLastUpdate[data.id] + " claps");
 
                 //Increment last-seen (could have this in here instead of as a map, and just check id?)
-                if(idsSeenSinceLastUpdate.hasOwnProperty(data.id))
+                if (idsSeenSinceLastUpdate.hasOwnProperty(data.id))
                     idsSeenSinceLastUpdate[data.id]++;
                 else
                     idsSeenSinceLastUpdate[data.id] = 1;
@@ -102,7 +108,7 @@ io.sockets.on('connection', function (socket) {
     //Here, could attack by constantly requesting new ids (could even request many ids and constantly send) and then sending claps;
     //should check by IP, have a look at (https://github.com/LearnBoost/socket.io/wiki/Authorizing)
     //Also should generate random ids rather than sequential
-    socket.on('request_id', function(data) {
+    socket.on('request_id', function (data) {
         var curId = nextId++;
         socket.emit('assign_id', {'id': curId});
         idToSocket[curId] = socket;
@@ -114,26 +120,23 @@ io.sockets.on('connection', function (socket) {
     });
 });
 
-setInterval(function(){
+setInterval(function () {
     var totalClaps = 0;
 
     //Send clap intensity to clappers so they can adjust their clapping
-    for(var id in idsSeenSinceLastUpdate) {
-        if(id == -1 || !idToSocket.hasOwnProperty(id))
+    for (var id in idsSeenSinceLastUpdate) {
+        if (id == -1 || !idToSocket.hasOwnProperty(id))
             continue;
 
         var socket = idToSocket[id];
         totalClaps += idsSeenSinceLastUpdate[id];
-        if(idsSeenSinceLastUpdate[id] == 1)
-        {
+        if (idsSeenSinceLastUpdate[id] == 1) {
             socket.emit("clap_intensity", {"clapIntensity": "low"});
         }
-        else if(idsSeenSinceLastUpdate[id] == 2)
-        {
+        else if (idsSeenSinceLastUpdate[id] == 2) {
             socket.emit("clap_intensity", {"clapIntensity": "medium"});
         }
-        else
-        {
+        else {
             socket.emit("clap_intensity", {"clapIntensity": "high"});
         }
     }
@@ -160,7 +163,7 @@ server.get('/', function (req, res) {
     });
 });
 
-server.get('/admin', function (req, res) {
+server.get('/admin', auth, function (req, res) {
     res.render('admin.jade', {
         locals: {
             title: 'Admin page',
@@ -176,7 +179,7 @@ server.get('/admin', function (req, res) {
 /**
  * Resets the statistics for the competition.
  */
-server.post('/admin-reset', function (req, res) {
+server.post('/admin-reset', auth, function (req, res) {
     init();
     res.setHeader('Content-Type', 'application/json');
     return res.send({'status': 'OK'});
@@ -185,13 +188,11 @@ server.post('/admin-reset', function (req, res) {
 /**
  * Re-assigns the currently active band.
  */
-server.post('/admin-band-name', function (req, res) {
+server.post('/admin-band-name', auth, function (req, res) {
     bandName = req.body.bandName;
     init();
 
     res.setHeader('Content-Type', 'application/json');
-
-    io.sockets.emit("update_band", {"currentBand": bandName});
 
     return res.send({'status': 'OK', 'message': 'Band name updated'});
 });
@@ -229,6 +230,8 @@ function init() {
     recordBuffer = [];
     //TODO: this should be a new file
     clearInterval();
+
+    io.sockets.emit("update_band", {"currentBand": bandName});
 }
 
 function flushEventsToDisk() {

@@ -2,5 +2,7 @@
     "version": "v0.6.6",
     "socketMethod": "notpolling",
     "vizMethod": "gauge",
+    "admin-principal": "admin",
+    "admin-password": "Th0ughtW0rksAg1l3",
     "bandNames": ["The Beatles", "Arcade Fire", "Vampire Weekend"]
 }
