@@ -5,6 +5,7 @@ var connect = require('connect')
     , express = require('express')
     , io = require('socket.io')
     , requirejs = require('requirejs')
+    , underscore = require('underscore')
     , fs = require('fs')
     , port = (process.env.PORT || 8081);
 
@@ -37,7 +38,9 @@ server.listen(port);
 //Setup Socket.IO
 var counter = 0;
 var recordBuffer = [];
-var bandName = 'Dummy';
+var bandName = underscore.chain(
+    underscore.map(config["bandNames"],
+        function(num, key) {return num;})).first().value() || "Undefined band";
 var nextId = 0;
 
 var idsSeenSinceLastUpdate = {};
@@ -148,7 +151,11 @@ setInterval(function(){
 server.get('/', function (req, res) {
     res.render('index.jade', {
         locals: {
-            title: 'Graph', description: 'Displays the graph', author: 'Your Name', analyticssiteid: 'XXXXXXX'
+            title: 'Graph',
+            description: 'Displays the graph',
+            author: 'Your Name',
+            analyticssiteid: 'XXXXXXX',
+            currentBand: bandName
         }
     });
 });
@@ -156,29 +163,47 @@ server.get('/', function (req, res) {
 server.get('/admin', function (req, res) {
     res.render('admin.jade', {
         locals: {
-            title: 'Admin page', description: 'Admin functions', author: 'Your Name', analyticssiteid: 'XXXXXXX'
-        }
+            title: 'Admin page',
+            description: 'Admin functions',
+            author: 'Your Name',
+            analyticssiteid: 'XXXXXXX'
+        },
+        bandNames: config["bandNames"],
+        currentBand: bandName
     });
 });
 
+/**
+ * Resets the statistics for the competition.
+ */
 server.post('/admin-reset', function (req, res) {
     init();
     res.setHeader('Content-Type', 'application/json');
     return res.send({'status': 'OK'});
 });
 
+/**
+ * Re-assigns the currently active band.
+ */
 server.post('/admin-band-name', function (req, res) {
     bandName = req.body.bandName;
     init();
 
     res.setHeader('Content-Type', 'application/json');
+
+    io.sockets.emit("update_band", {"currentBand": bandName});
+
     return res.send({'status': 'OK', 'message': 'Band name updated'});
 });
 
 server.get('/tap', function (req, res) {
     res.render('tap.jade', {
         locals: {
-            title: 'Tap page', description: 'Tap away', author: 'Your Name', analyticssiteid: 'XXXXXXX'
+            title: 'Tap page',
+            description: 'Tap away',
+            author: 'Your Name',
+            analyticssiteid: 'XXXXXXX',
+            currentBand: bandName
         }
     });
 });

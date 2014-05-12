@@ -10,7 +10,8 @@
     "mongoose": "2.4.8",
     "socket.io": "0.8.7",
     "socket.io-client": "0.9.16",
-    "requirejs": "2.1.11"
+    "requirejs": "2.1.11",
+    "underscore": "1.6.0"
   },
   "devDependencies": {
     "vows": "0.5.x",

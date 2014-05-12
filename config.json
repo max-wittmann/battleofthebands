@@ -1,5 +1,6 @@
 {
     "version": "v0.6.6",
     "socketMethod": "notpolling",
-    "vizMethod": "gauge"
+    "vizMethod": "gauge",
+    "bandNames": ["The Beatles", "Arcade Fire", "Vampire Weekend"]
 }

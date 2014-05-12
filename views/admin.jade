@@ -2,7 +2,7 @@ extends layout
 block content
     script(defer, src='/js/admin.js')
     div
-        h1 Admin Page
+        h1 #{locals.title}
             p
                 h2 Reset
                 form(method='post')
@@ -11,6 +11,10 @@ block content
             p
                 h2 Band Name
                 form(method='post')
-                    input(id='bandName',type='text')
-                    input(type='button',value='Submit',onclick='setBandName()')
+                    #bandNames
+                        select(id='bandName',onchange='setBandName()')
+                            for bandName in bandNames
+                                option(value='#{bandName}',selected=currentBand==bandName) #{bandName}
+
+
 

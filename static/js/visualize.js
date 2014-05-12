@@ -33,6 +33,10 @@ require(['./clientConfig'], function(config) {
         socket.on('visualize_claps', function (data) {
             updateFunc(data.nrClaps);
         });
+
+        socket.on('update_band', function(data) {
+            $("#currentBand").text(data.currentBand);
+        });
     }
 
     initViz("vizArea");

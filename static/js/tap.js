@@ -71,6 +71,10 @@ $(document).ready(function () {
         setInterval(createUpdateTextInterval("#clapIntensity"), 500);
     });
 
+    socket.on('update_band', function(data) {
+        $("#currentBand").text(data.currentBand);
+    });
+
     function createUpdateTextInterval(selector, text) {
         var intervalFunc = function() {
             $(selector).text(text);

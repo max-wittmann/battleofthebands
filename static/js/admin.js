@@ -1,14 +1,13 @@
 /* Author: YOUR NAME HERE
  */
 
-$(document).ready(function () {
 
+$(document).ready(function () {
 
 });
 
 function resetCounter() {
     $.post("admin-reset", function(data){
-
         console.log("Result: " + JSON.stringify(data));
     });
 }
