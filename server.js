@@ -43,6 +43,8 @@ server.error(function (err, req, res, next) {
 server.listen(port);
 
 //Setup Socket.IO
+var VISUALIZE_KEYWORD = '__visualize__';
+
 var counter = 0;
 var recordBuffer = [];
 var bandName = underscore.chain(
@@ -50,7 +52,6 @@ var bandName = underscore.chain(
         function (num, key) {
             return num;
         })).first().value() || "Undefined band";
-var nextId = 0;
 
 var idsSeenSinceLastUpdate = {};
 var resetTime = 500;
@@ -58,8 +59,6 @@ var clapPerAudienceLimit = 3;
 var registeredNames = {};
 
 var io = io.listen(server);
-
-//Todo: Currently this isn't cleaned and would accumulate dead sockets; should clean it out periodically
 var idToSocket = {};
 
 //Option to use polling for heroku
@@ -73,8 +72,6 @@ if (config.socketMethod == "polling") {
 
 io.sockets.on('connection', function (socket) {
     console.log('Client Connected' + socket);
-
-//    socket.on('requestViz')
 
     socket.on('clap', function (data) {
         //Ignore things with non-id
@@ -108,6 +105,10 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
         console.log('Client Disconnected - ' + socket);
         delete idToSocket[socket.id];
+    });
+
+    socket.on(VISUALIZE_KEYWORD, function(data) {
+        addClapper(data.sessionId, VISUALIZE_KEYWORD);
     });
 });
 
@@ -155,6 +156,7 @@ server.get('/', function (req, res) {
 });
 
 server.get('/admin', auth, function (req, res) {
+    console.log("FOooo");
     res.render('admin.jade', {
         locals: {
             title: 'Admin page',
@@ -164,7 +166,12 @@ server.get('/admin', auth, function (req, res) {
         },
         bandNames: config["bandNames"],
         currentBand: bandName,
-        clappers: underscore.map(io.sockets.clients(), function(socket) {return socket.clapperName; })
+        clappers:
+            underscore.chain(underscore.map(io.sockets.clients(), function(socket) {
+            return socket.clapperName;
+        })).filter(function(clapperName) {
+                return clapperName != null && clapperName != VISUALIZE_KEYWORD}
+            ).value()
     });
 });
 
@@ -192,14 +199,23 @@ server.post('/admin-band-name', auth, function (req, res) {
 server.post('/admin-pick-winner', auth, function(req, res) {
     var result = {};
 
-    var winnerSocket = underscore.chain(underscore.filter(idToSocket, function(data){
-        return data.id != null;
+    var winnerSocket = underscore.chain(underscore.filter(idToSocket, function(socket){
+        return socket.id != null && socket.clapperName != VISUALIZE_KEYWORD;
     })).shuffle().first().value();
 
     if (winnerSocket) {
         var clapperName = winnerSocket.clapperName || "Champion";
         result = {status: 'OK', message: 'Winner is - ' + clapperName, name: clapperName };
         winnerSocket.emit("winner", {winner: true, winnerName: clapperName});
+
+        //send to the visualize pages
+        underscore.chain(underscore.filter(idToSocket, function(socket) {
+            return socket.clapperName === VISUALIZE_KEYWORD;
+        })).each(function(socket) {
+            socket.emit("winner",
+                {winner: true, winnerName: clapperName, message: "Congratulations " + clapperName});
+        });
+
     } else {
         result = {status: 'Failed', message: 'No clappers!!'};
         res.statusCode = 400;

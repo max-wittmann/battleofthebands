@@ -28,14 +28,22 @@ require(['./clientConfig'], function(config) {
     function buildViz(initFunc, updateFunc) {
         var socket = io.connect();
 
+        socket.on('connect', function(){
+            socket.emit('__visualize__', {sessionId: socket.socket.sessionid});
+        });
+
         initFunc(socket);
 
         socket.on('visualize_claps', function (data) {
             updateFunc(data.nrClaps);
         });
 
-        socket.on('update_band', function(data) {
+        socket.on('update_band', function (data) {
             $("#currentBand").text(data.currentBand);
+        });
+
+        socket.on('winner', function (data) {
+            $("#winner").text(data.message)
         });
     }
 

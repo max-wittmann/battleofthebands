@@ -98,6 +98,10 @@ $(document).ready(function () {
                     alert("Congratulations you are the winner!!")
                 });
 
+                socket.on('reset', function() {
+                    store.remove('name');
+                });
+
                 function createUpdateTextInterval(selector, text) {
                     var intervalFunc = function () {
                         $(selector).text(text);
@@ -106,7 +110,9 @@ $(document).ready(function () {
                     return intervalFunc;
                 }
             }).fail(function (data) {
-                console.log("Failed to join - " + JSON.stringify(data));
+                alert("Failed to join - " + JSON.stringify(data));
+                name = window.prompt("Username: ");
+                register(name, sessionid);
             });
         }
     });
