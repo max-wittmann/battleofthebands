@@ -55,7 +55,7 @@ var nextId = 0;
 var idsSeenSinceLastUpdate = {};
 var resetTime = 500;
 var clapPerAudienceLimit = 3;
-
+var registeredNames = {};
 
 var io = io.listen(server);
 
@@ -105,18 +105,9 @@ io.sockets.on('connection', function (socket) {
         }
     });
 
-    //Here, could attack by constantly requesting new ids (could even request many ids and constantly send) and then sending claps;
-    //should check by IP, have a look at (https://github.com/LearnBoost/socket.io/wiki/Authorizing)
-    //Also should generate random ids rather than sequential
-    socket.on('request_id', function (data) {
-        var curId = nextId++;
-        socket.emit('assign_id', {'id': curId});
-        idToSocket[curId] = socket;
-        console.log("Id requested, returned " + curId);
-    });
-
     socket.on('disconnect', function () {
-        console.log('Client Disconnected.');
+        console.log('Client Disconnected - ' + socket);
+        delete idToSocket[socket.id];
     });
 });
 
@@ -196,6 +187,55 @@ server.post('/admin-band-name', auth, function (req, res) {
 
     return res.send({'status': 'OK', 'message': 'Band name updated'});
 });
+
+/**
+ * Register a given clapper.
+ */
+server.post('/register-clapper', function (req, res) {
+    var name = req.body.name;
+    var sessionId = req.body.sessionId;
+    var result = {};
+
+    if (registeredNames[name] == null) {
+        registeredNames[name] = true;
+        addClapper(sessionId);
+        result = {status: 'OK', message: 'Registration completed.', name: name };
+    } else {
+        result = {status: 'Fail', message: 'Name already registered' };
+        res.statusCode = 400;
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    return res.send(result);
+});
+
+/**
+ * Join the list of clappers.
+ */
+server.post('/join', function (req, res) {
+    var name = req.body.name;
+    var sessionId = req.body.sessionId;
+    var result = {};
+
+    if (registeredNames[name]) {
+        addClapper(sessionId);
+        result = {status: 'OK', message: 'Join completed.'}
+        res.setHeader('Content-Type', 'application/json');
+    } else {
+        res.statusCode = 400;
+        result = {'status': 'Fail', 'message': 'Name ' + name + ' is not registered.'}
+    }
+
+    return res.send(result);
+});
+
+
+function addClapper(sessionId) {
+    var socket = underscore.find(io.sockets.clients(), function (sock) {
+        return sock.id === sessionId;
+    });
+    idToSocket[sessionId] = socket;
+}
 
 server.get('/tap', function (req, res) {
     res.render('tap.jade', {

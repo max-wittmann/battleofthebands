@@ -12,6 +12,7 @@
     "socket.io-client": "0.9.16",
     "requirejs": "2.1.11",
     "underscore": "1.6.0",
+    "store": "1.3.16",
     "lazy": "1.0.11"
   },
   "devDependencies": {

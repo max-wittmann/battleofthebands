@@ -1,85 +1,107 @@
 $(document).ready(function () {
     var socket = io.connect();
-    var myId = -1;
     var curClapIntensity = 'none';
 
-    $(window).bind("touchstart click", function(evt){
-        function applyUIClapFeedback(clapIntensity) {
-            $("body").removeClass("highIntensity mediumIntensity lowIntensity noIntensity");
-            $("body").addClass(getClapIntensityClass(clapIntensity));
+    socket.on('connect', function () {
+        //check if registration exists on FS
+        if (!store.enabled) {
+            alert('Local storage is not supported by your browser. ' +
+                'Please disable "Private Mode", or upgrade to a modern browser.')
+        } else {
+            var name = store.get('name');
 
-            var intervalVar = setInterval(
-                function(){
-                    $("body").addClass("noIntensity");
-                    $("body").removeClass("highIntensity mediumIntensity lowIntensity");
-                    window.clearInterval(intervalVar);
-                }, 400
-            );
-        }
+            var sessionid = socket.socket.sessionid;
+            if (name) {
+                join(name, sessionid);
 
-        function getClapIntensityClass(clapIntensity) {
-            var clapColor = '';
+            } else {
+                alert("Registering as 'foo'.");
 
-            if(clapIntensity == 'high')
-            {
-                clapColor = 'highIntensity';
-            }
-            else if(clapIntensity == 'medium') {
-                clapColor = 'mediumIntensity';
-            }
-            else if(clapIntensity == 'low') {
-                clapColor = 'lowIntensity';
-            }
-            else {
-                clapColor =  'noIntensity'
-            }
+                //TODO: need to retrieve name from some user interface.
+                name = "foo";
+                $.post("register-clapper", {name: name, sessionId: sessionid}, function (data) {
 
-            return clapColor;
-        }
-
-        function requestIdIfNotAssigned() {
-            if(myId == -1) {
-                socket.emit('request_id', {});
-                console.log("Requesting id");
+                }).success(function (data ) {
+                    store.set("name", name);
+                    window.alert("Registration complete - "+ JSON.stringify(data));
+                }).fail(function (data) {
+                    window.alert("Please register again - " + JSON.stringify(data));
+                });
             }
         }
 
-        function sendClapToServer(socket, id) {
-            socket.emit('clap', {"id": id, "time": (new Date()).getTime() });
-        }
-
-        evt.preventDefault();
-        /*
-        Note that this is asynchrnous; the clap will be lost since it'll be sent with a -1 id.
-        We could 'buffer' these until an id is assigned and then bulk-send 'em, but there shouldn't be much lost by just
-         ignoring it.
+        /**
+         * Join the competition.
          */
-        requestIdIfNotAssigned();
-        sendClapToServer(socket, myId);
-        applyUIClapFeedback(curClapIntensity);
-    });
+        function join(name, sessionId) {
+            $.post("join", {name: name, sessionId: sessionId}, function () {
+            }).success(function (data) {
+                console.log("Joined successfully.");
 
-    socket.on('assign_id', function (data) {
-        myId = data.id;
-        console.log("Got id " + myId);
-    });
+                $(window).bind("touchstart click", function (evt) {
+                    function applyUIClapFeedback(clapIntensity) {
+                        $("body").removeClass("highIntensity mediumIntensity lowIntensity noIntensity");
+                        $("body").addClass(getClapIntensityClass(clapIntensity));
 
-    socket.on('clap_intensity', function(data) {
-        console.log("Got " + data.clapIntensity);
-        $("#clapIntensity").text(data.clapIntensity);
-        curClapIntensity = data.clapIntensity;
-        setInterval(createUpdateTextInterval("#clapIntensity"), 500);
-    });
+                        var intervalVar = setInterval(
+                            function () {
+                                $("body").addClass("noIntensity");
+                                $("body").removeClass("highIntensity mediumIntensity lowIntensity");
+                                window.clearInterval(intervalVar);
+                            }, 400
+                        );
+                    }
 
-    socket.on('update_band', function(data) {
-        $("#currentBand").text(data.currentBand);
-    });
+                    function getClapIntensityClass(clapIntensity) {
+                        var clapColor = '';
 
-    function createUpdateTextInterval(selector, text) {
-        var intervalFunc = function() {
-            $(selector).text(text);
-            window.clearInterval(intervalFunc);
-        };
-        return intervalFunc;
-    }
+                        if (clapIntensity == 'high') {
+                            clapColor = 'highIntensity';
+                        }
+                        else if (clapIntensity == 'medium') {
+                            clapColor = 'mediumIntensity';
+                        }
+                        else if (clapIntensity == 'low') {
+                            clapColor = 'lowIntensity';
+                        }
+                        else {
+                            clapColor = 'noIntensity'
+                        }
+
+                        return clapColor;
+                    }
+
+                    function sendClapToServer(socket, id) {
+                        socket.emit('clap', {"id": id, "time": (new Date()).getTime() });
+                    }
+
+                    evt.preventDefault();
+
+                    sendClapToServer(socket, sessionId);
+                    applyUIClapFeedback(curClapIntensity);
+                });
+
+                socket.on('clap_intensity', function (data) {
+                    console.log("Got " + data.clapIntensity);
+                    $("#clapIntensity").text(data.clapIntensity);
+                    curClapIntensity = data.clapIntensity;
+                    setInterval(createUpdateTextInterval("#clapIntensity"), 500);
+                });
+
+                socket.on('update_band', function (data) {
+                    $("#currentBand").text(data.currentBand);
+                });
+
+                function createUpdateTextInterval(selector, text) {
+                    var intervalFunc = function () {
+                        $(selector).text(text);
+                        window.clearInterval(intervalFunc);
+                    };
+                    return intervalFunc;
+                }
+            }).fail(function (data) {
+                console.log("Failed to join - " + JSON.stringify(data));
+            });
+        }
+    });
 });
