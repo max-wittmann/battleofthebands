@@ -15,19 +15,21 @@ $(document).ready(function () {
                 join(name, sessionid);
 
             } else {
-                alert("Registering as 'foo'.");
-
-                //TODO: need to retrieve name from some user interface.
-                name = "foo";
-                $.post("register-clapper", {name: name, sessionId: sessionid}, function (data) {
-
-                }).success(function (data ) {
-                    store.set("name", name);
-                    window.alert("Registration complete - "+ JSON.stringify(data));
-                }).fail(function (data) {
-                    window.alert("Please register again - " + JSON.stringify(data));
-                });
+                name = window.prompt("Username: ");
+                register(name, sessionid);
             }
+        }
+
+        function register(name, sessionid) {
+            $.post("register-clapper", {name: name, sessionId: sessionid}, function (data) {
+
+            }).success(function (data) {
+                store.set("name", data.name);
+                join(data.name, sessionid)
+                window.alert("Registration complete - " + JSON.stringify(data));
+            }).fail(function (data) {
+                window.alert("Please register again - " + JSON.stringify(data));
+            });
         }
 
         /**
@@ -90,6 +92,10 @@ $(document).ready(function () {
 
                 socket.on('update_band', function (data) {
                     $("#currentBand").text(data.currentBand);
+                });
+
+                socket.on('winner', function(data){
+                    alert("Congratulations you are the winner!!")
                 });
 
                 function createUpdateTextInterval(selector, text) {

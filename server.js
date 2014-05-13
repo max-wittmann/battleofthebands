@@ -163,7 +163,8 @@ server.get('/admin', auth, function (req, res) {
             analyticssiteid: 'XXXXXXX'
         },
         bandNames: config["bandNames"],
-        currentBand: bandName
+        currentBand: bandName,
+        clappers: underscore.map(io.sockets.clients(), function(socket) {return socket.clapperName; })
     });
 });
 
@@ -188,6 +189,25 @@ server.post('/admin-band-name', auth, function (req, res) {
     return res.send({'status': 'OK', 'message': 'Band name updated'});
 });
 
+server.post('/admin-pick-winner', auth, function(req, res) {
+    var result = {};
+
+    var winnerSocket = underscore.chain(underscore.filter(idToSocket, function(data){
+        return data.id != null;
+    })).shuffle().first().value();
+
+    if (winnerSocket) {
+        var clapperName = winnerSocket.clapperName || "Champion";
+        result = {status: 'OK', message: 'Winner is - ' + clapperName, name: clapperName };
+        winnerSocket.emit("winner", {winner: true, winnerName: clapperName});
+    } else {
+        result = {status: 'Failed', message: 'No clappers!!'};
+        res.statusCode = 400;
+    }
+    res.setHeader('Content-Type', 'application/json');
+    return res.send(result);
+});
+
 /**
  * Register a given clapper.
  */
@@ -198,7 +218,7 @@ server.post('/register-clapper', function (req, res) {
 
     if (registeredNames[name] == null) {
         registeredNames[name] = true;
-        addClapper(sessionId);
+        addClapper(sessionId, name);
         result = {status: 'OK', message: 'Registration completed.', name: name };
     } else {
         result = {status: 'Fail', message: 'Name already registered' };
@@ -218,7 +238,7 @@ server.post('/join', function (req, res) {
     var result = {};
 
     if (registeredNames[name]) {
-        addClapper(sessionId);
+        addClapper(sessionId, name);
         result = {status: 'OK', message: 'Join completed.'}
         res.setHeader('Content-Type', 'application/json');
     } else {
@@ -228,14 +248,6 @@ server.post('/join', function (req, res) {
 
     return res.send(result);
 });
-
-
-function addClapper(sessionId) {
-    var socket = underscore.find(io.sockets.clients(), function (sock) {
-        return sock.id === sessionId;
-    });
-    idToSocket[sessionId] = socket;
-}
 
 server.get('/tap', function (req, res) {
     res.render('tap.jade', {
@@ -248,6 +260,14 @@ server.get('/tap', function (req, res) {
         }
     });
 });
+
+function addClapper(sessionId, name) {
+    var socket = underscore.find(io.sockets.clients(), function (sock) {
+        return sock.id === sessionId;
+    });
+    socket.clapperName = name;
+    idToSocket[sessionId] = socket;
+}
 
 //A Route for Creating a 500 Error (Useful to keep around)
 server.get('/500', function (req, res) {

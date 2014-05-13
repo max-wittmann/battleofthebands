@@ -15,3 +15,16 @@ block content
                         select(id='bandName',onchange='changeBand()')
                             for bandName in bandNames
                                 option(value='#{bandName}',selected=currentBand==bandName) #{bandName}
+
+            p
+                h2 Pick winner
+                    form(method='post')
+                        input(type='button', value='Go',onclick='pickWinner()')
+
+            p
+                h2 Clappers
+                    p
+                        #clappers
+                            for clapper in clappers
+                                #{clapper}
+
