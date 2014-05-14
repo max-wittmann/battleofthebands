@@ -6,7 +6,7 @@ var connect = require('connect')
     , io = require('socket.io')
     , requirejs = require('requirejs')
     , lazy = require('lazy')
-    , underscore = require('underscore')
+    , _ = require('underscore')
     , fs = require('fs')
     , port = (process.env.PORT || 8081);
 
@@ -47,11 +47,7 @@ var VISUALIZE_KEYWORD = '__visualize__';
 
 var counter = 0;
 var recordBuffer = [];
-var bandName = underscore.chain(
-    underscore.map(config["bandNames"],
-        function (num, key) {
-            return num;
-        })).first().value() || "Undefined band";
+var bandName = _.chain(config["bandNames"]).map(function (num, key) {return num; }).first().value() || "Undefined band";
 
 var idsSeenSinceLastUpdate = {};
 var resetTime = 500;
@@ -108,7 +104,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on(VISUALIZE_KEYWORD, function(data) {
-        addClapper(data.sessionId, VISUALIZE_KEYWORD);
+        addWatcher(data.sessionId, VISUALIZE_KEYWORD);
     });
 });
 
@@ -156,7 +152,10 @@ server.get('/', function (req, res) {
 });
 
 server.get('/admin', auth, function (req, res) {
-    console.log("FOooo");
+    var sockets = io.sockets.clients();
+    var clappers =
+        _.chain(sockets).map(function(socket) {return socket.clapperName;}).without(VISUALIZE_KEYWORD).value();
+
     res.render('admin.jade', {
         locals: {
             title: 'Admin page',
@@ -166,12 +165,7 @@ server.get('/admin', auth, function (req, res) {
         },
         bandNames: config["bandNames"],
         currentBand: bandName,
-        clappers:
-            underscore.chain(underscore.map(io.sockets.clients(), function(socket) {
-            return socket.clapperName;
-        })).filter(function(clapperName) {
-                return clapperName != null && clapperName != VISUALIZE_KEYWORD}
-            ).value()
+        clappers: clappers
     });
 });
 
@@ -192,28 +186,28 @@ server.post('/admin-band-name', auth, function (req, res) {
     init();
 
     res.setHeader('Content-Type', 'application/json');
-
     return res.send({'status': 'OK', 'message': 'Band name updated'});
 });
 
 server.post('/admin-pick-winner', auth, function(req, res) {
     var result = {};
 
-    var winnerSocket = underscore.chain(underscore.filter(idToSocket, function(socket){
+    var winnerSocket = _.chain(idToSocket).filter(function(socket){
         return socket.id != null && socket.clapperName != VISUALIZE_KEYWORD;
-    })).shuffle().first().value();
+    }).shuffle().first().value();
 
     if (winnerSocket) {
         var clapperName = winnerSocket.clapperName || "Champion";
         result = {status: 'OK', message: 'Winner is - ' + clapperName, name: clapperName };
-        winnerSocket.emit("winner", {winner: true, winnerName: clapperName});
+
+        //send message to winners socket
+        winnerSocket.emit("winner", result);
 
         //send to the visualize pages
-        underscore.chain(underscore.filter(idToSocket, function(socket) {
+        _.chain(idToSocket).filter(function(socket) {
             return socket.clapperName === VISUALIZE_KEYWORD;
-        })).each(function(socket) {
-            socket.emit("winner",
-                {winner: true, winnerName: clapperName, message: "Congratulations " + clapperName});
+        }).each(function(socket) {
+            socket.emit("winnerAnnounced", result);
         });
 
     } else {
@@ -234,7 +228,7 @@ server.post('/register-clapper', function (req, res) {
 
     if (registeredNames[name] == null) {
         registeredNames[name] = true;
-        addClapper(sessionId, name);
+        addWatcher(sessionId, name);
         result = {status: 'OK', message: 'Registration completed.', name: name };
     } else {
         result = {status: 'Fail', message: 'Name already registered' };
@@ -254,7 +248,7 @@ server.post('/join', function (req, res) {
     var result = {};
 
     if (registeredNames[name]) {
-        addClapper(sessionId, name);
+        addWatcher(sessionId, name);
         result = {status: 'OK', message: 'Join completed.'}
         res.setHeader('Content-Type', 'application/json');
     } else {
@@ -277,12 +271,17 @@ server.get('/tap', function (req, res) {
     });
 });
 
-function addClapper(sessionId, name) {
-    var socket = underscore.find(io.sockets.clients(), function (sock) {
+function addWatcher(sessionId, name) {
+    var socket = _.find(io.sockets.clients(), function (sock) {
         return sock.id === sessionId;
     });
-    socket.clapperName = name;
-    idToSocket[sessionId] = socket;
+
+    if (socket) {
+        socket.clapperName = name;
+        idToSocket[sessionId] = socket;
+    } else {
+        console.error("Socket could not be found for session " + sessionId);
+    }
 }
 
 //A Route for Creating a 500 Error (Useful to keep around)
@@ -304,27 +303,7 @@ function NotFound(msg) {
 function init() {
     counter = 0;
     recordBuffer = [];
-    //TODO: this should be a new file
-    clearInterval();
-
     io.sockets.emit("update_band", {"currentBand": bandName});
-}
-
-function flushEventsToDisk() {
-//flush to disk every 500 ms
-    setInterval(function () {
-        //write to file system for potential replay
-        fs.appendFile(buildMessagesFilePath(), JSON.stringify(recordBuffer) + '\n', function (err) {
-            if (err) {
-                util.error("Failed to write to file.");
-            }
-            recordBuffer = [];
-        });
-    }, 5000);
-}
-
-function buildMessagesFilePath() {
-    return '/tmp/' + bandName + '.txt';
 }
 
 console.log('Listening on http://0.0.0.0:' + port);

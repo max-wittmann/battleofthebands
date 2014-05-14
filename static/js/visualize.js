@@ -42,7 +42,7 @@ require(['./clientConfig'], function(config) {
             $("#currentBand").text(data.currentBand);
         });
 
-        socket.on('winner', function (data) {
+        socket.on('winnerAnnounced', function (data) {
             $("#winner").text(data.message)
         });
     }
