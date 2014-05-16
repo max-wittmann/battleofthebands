@@ -42,13 +42,14 @@ $(document).ready(function () {
 
                 $(window).bind("touchstart click", function (evt) {
                     function applyUIClapFeedback(clapIntensity) {
-                        $("body").removeClass("highIntensity mediumIntensity lowIntensity noIntensity");
-                        $("body").addClass(getClapIntensityClass(clapIntensity));
+                        var bodyElement = $("body");
+                        bodyElement.removeClass("highIntensity mediumIntensity lowIntensity noIntensity");
+                        bodyElement.addClass(getClapIntensityClass(clapIntensity));
 
                         var intervalVar = setInterval(
                             function () {
-                                $("body").addClass("noIntensity");
-                                $("body").removeClass("highIntensity mediumIntensity lowIntensity");
+                                bodyElement.addClass("noIntensity");
+                                bodyElement.removeClass("highIntensity mediumIntensity lowIntensity");
                                 window.clearInterval(intervalVar);
                             }, 400
                         );

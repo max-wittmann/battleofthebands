@@ -140,10 +140,10 @@ setInterval(function () {
 
 /////// ADD ALL YOUR ROUTES HERE  /////////
 server.get('/', function (req, res) {
-    res.render('index.jade', {
+    res.render('tap.jade', {
         locals: {
-            title: 'Graph',
-            description: 'Displays the graph',
+            title: 'Tap page',
+            description: 'Tap away',
             author: 'Your Name',
             analyticssiteid: 'XXXXXXX',
             currentBand: bandName
@@ -259,11 +259,11 @@ server.post('/join', function (req, res) {
     return res.send(result);
 });
 
-server.get('/tap', function (req, res) {
-    res.render('tap.jade', {
+server.get('/view', function (req, res) {
+    res.render('index.jade', {
         locals: {
-            title: 'Tap page',
-            description: 'Tap away',
+            title: 'Graph',
+            description: 'Displays the graph',
             author: 'Your Name',
             analyticssiteid: 'XXXXXXX',
             currentBand: bandName
